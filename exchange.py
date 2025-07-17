@@ -7,7 +7,7 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
-# Açılış fiyatlarını burada tutuyoruz (başta bir kez atanır)
+
 open_prices = {}
 last_prices = {}
 initial_volume = {}
@@ -32,16 +32,15 @@ def simulate_market_data(companies):
         if symbol not in open_prices:
             start_price = round(random.uniform(10, 500), 2)
             open_prices[symbol] = start_price
-            last_prices[symbol] = start_price  # başta açılış fiyatı ile başla
+            last_prices[symbol] = start_price  
             initial_volume[symbol] = random.randint(10000, 5000000)
-
-        # her seferde son fiyat üzerinden küçük bir değişim uygula
+            
         last_price = last_prices[symbol]
         pct_change = random.uniform(-0.001, 0.001)  
         current_price = round(last_price * (1 + pct_change), 2)
-        last_prices[symbol] = current_price  # güncelle!
+        last_prices[symbol] = current_price  
 
-        # yüzdelik değişim açılış fiyatına göre hesaplanır (bu mantıklı)
+
         open_price = open_prices[symbol]
         pct_change_display = round((current_price - open_price) / open_price * 100, 2)
 
