@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Market Tracker</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1e1e2f;
+      color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #61dafb;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      background: #2c2c44;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: center;
+    }
+    th {
+      background-color: #444466;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    tr:nth-child(even) {
+      background-color: #333355;
+    }
+    tr:hover {
+      background-color: #3a3a5a;
+      cursor: pointer;
+    }
+    .positive {
+      color: #4caf50;
+      font-weight: 700;
+    }
+    .negative {
+      color: #f44336;
+      font-weight: 700;
+    }
+    .timestamp {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #999;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      th {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+      tr {
+        margin-bottom: 15px;
+      }
+      td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+        text-align: left;
+      }
+      td:before {
+        position: absolute;
+        top: 12px;
+        left: 15px;
+        width: 45%;
+        white-space: nowrap;
+        font-weight: 600;
+      }
+      td:nth-of-type(1):before { content: "Symbol"; }
+      td:nth-of-type(2):before { content: "Name"; }
+      td:nth-of-type(3):before { content: "Open"; }
+      td:nth-of-type(4):before { content: "Current Price"; }
+      td:nth-of-type(5):before { content: "% Change"; }
+      td:nth-of-type(6):before { content: "Volume"; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Market Tracker</h1>
+    <table id="market-table" aria-label="Market Data">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Open</th>
+          <th>Current Price</th>
+          <th>% Change</th>
+          <th>Volume</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="timestamp" id="last-updated">Last Updated: --</div>
+  </div>
+
+  <script>
+    const tableBody = document.querySelector('#market-table tbody');
+    const lastUpdated = document.getElementById('last-updated');
+
+    // Format number with commas for thousands
+    function formatNumber(num) {
+      return num.toLocaleString();
+    }
+
+    // Fetch market data and update table
+    async function fetchMarketData() {
+      try {
+        const response = await fetch('http://localhost:5000/api/market');
+        if (!response.ok) throw new Error('Network response not OK');
+        const data = await response.json();
+
+        tableBody.innerHTML = '';
+
+        data.forEach(item => {
+          const tr = document.createElement('tr');
+
+          // Percent change styling
+          const changeClass = item.percent_change >= 0 ? 'positive' : 'negative';
+
+          tr.innerHTML = `
+            <td>${item.symbol}</td>
+            <td>${item.name}</td>
+            <td>$${item.open.toFixed(2)}</td>
+            <td>$${item.current_price.toFixed(2)}</td>
+            <td class="${changeClass}">${item.percent_change.toFixed(2)}%</td>
+            <td>${formatNumber(item.volume)}</td>
+          `;
+
+          tableBody.appendChild(tr);
+        });
+
+        if (data.length > 0) {
+          lastUpdated.textContent = 'Last Updated: ' + data[0].timestamp + ' UTC';
+        }
+
+      } catch (error) {
+        console.error('Failed to fetch market data:', error);
+        lastUpdated.textContent = 'Failed to update data';
+      }
+    }
+
+    // Initial fetch
+    fetchMarketData();
+
+    // Refresh every 3 seconds
+    setInterval(fetchMarketData, 3000);
+  </script>
+</body>
+</html>
