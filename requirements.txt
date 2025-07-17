@@ -1,0 +1,24 @@
+# ETL / Genel
+boto3
+requests
+pandas== 2.0.0
+
+# Spark 
+pyspark==3.5.0
+
+# PostgreSQL
+psycopg2-binary
+
+# Flask
+flask
+flask-cors
+
+# Mongo
+pymongo
+
+# Airflow (minimum setup)
+apache-airflow==2.7.1
+
+
+# Jupyter 
+ipykernel
