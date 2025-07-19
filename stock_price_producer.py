@@ -8,7 +8,7 @@ from pyspark.sql.functions import *
 
 # Logging Setup
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
-logger = logging.getLogger("KafkaStockConsumer")
+logger = logging.getLogger("KafkaStockProducer")
 
 producer_params = {
     'kafka.bootstrap.servers': 'broker:29092',
