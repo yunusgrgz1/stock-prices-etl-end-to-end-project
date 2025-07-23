@@ -63,16 +63,25 @@ def consume_data(spark, schema):
         raise
 
 def process_batch(df, epoch_id):
-    logger.info(f"[Epoch {epoch_id}] Starting batch processing...")
+    if df.isEmpty():
+        logger.info(f"[Epoch {epoch_id}] No data.")
+        return
+
+    logger.info(f"[Epoch {epoch_id}] Processing {df.count()} rows.")
+
     try:
-        if df.isEmpty():
-            logger.info(f"[Epoch {epoch_id}] No data received.")
-        else:
-            count = df.count()
-            logger.info(f"[Epoch {epoch_id}] Received {count} rows.")
+        # Convert to Pandas and then to MongoDB
+        records = df.toPandas().to_dict("records")
+        
+        if records:
+            client = MongoClient("mongodb://root:example@mongodb:27017")
+            db = client["mydb"]
+            collection = db["mycollection"]
+            collection.insert_many(records)
+            client.close()
+            logger.info(f"[Epoch {epoch_id}] Successfully written to MongoDB.")
     except Exception as e:
-        logger.error(f"[Epoch {epoch_id}] Batch processing failed.")
-        logger.error(e)
+        logger.error(f"[Epoch {epoch_id}] MongoDB write failed: {e}")
 
 def stream_main():
     logger.info("Initializing stream processing...")
